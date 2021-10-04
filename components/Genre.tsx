@@ -6,23 +6,17 @@ import { CatalogGenre } from '../types';
 
 export interface GenreProps {
   genre: CatalogGenre;
-  onSelected: Function;
+  onSelected: (selected: boolean) => void;
 }
 
 export const Genre: FC<GenreProps> = (props) => {
-  const [isSelected, setSelected] = React.useState(false);
-
   const onPressChange = () => {
-    setSelected(!isSelected);
+    props.onSelected(!props.genre.selected)
   }
-
-  React.useEffect(() => {
-    props.onSelected(isSelected);
-  }, [isSelected]);
 
   return <Chip
     style={styles.wrapper}
-    selected={isSelected}
+    selected={props.genre.selected}
     onPress={onPressChange}
   >
     {props.genre?.name}

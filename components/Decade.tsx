@@ -10,19 +10,13 @@ export interface DecadeProps {
 }
 
 export const Decade: FC<DecadeProps> = (props) => {
-  const [isSelected, setSelected] = React.useState(false);
-
   const onPressChange = () => {
-    setSelected(!isSelected);
+    props.onSelected(!props.decade.selected)
   }
-
-  React.useEffect(() => {
-    props.onSelected(isSelected);
-  }, [isSelected]);
 
   return <Chip
     style={styles.wrapper}
-    selected={isSelected}
+    selected={props.decade.selected}
     onPress={onPressChange}
   >
     {props.decade?.name}

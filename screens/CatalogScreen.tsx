@@ -6,10 +6,9 @@ import { ActivityIndicator, Appbar, Colors } from 'react-native-paper';
 import { Text, View } from '../components/Themed';
 import { MusicDecades, VideoFilter } from '../components/VideoFilter';
 import { VideoList } from '../components/VideoList';
-import { CatalogFilter, CatalogVideo, RootStackScreenProps, XiteCollectionResponse } from '../types';
+import { CatalogDecade, CatalogFilter, CatalogGenre, CatalogVideo, RootStackScreenProps, XiteCollectionResponse } from '../types';
 
 interface Catalog {
-  genres: Map<number, string>;
   videos: CatalogVideo[];
   filter: CatalogFilter;
   loaded: boolean;
@@ -59,9 +58,14 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
   }, []);
 
   const getFilterView = () => {
-    return <VideoFilter genres={catalogData.genres} onFilterChanged={(newFilter: CatalogFilter) => setCatalogData({
+    return <VideoFilter filter={catalogData.filter} onFilterChanged={(partialFilter: Partial<CatalogFilter>) => setCatalogData({
       ...catalogData,
-      filter: newFilter
+      filter: {
+        ...catalogData.filter,
+        ...partialFilter,
+        genreIds: [...(partialFilter.genreMap ?? [])].filter(([key, value]) => value.selected === true).map(e => e[0]),
+        decadeIds: [...(partialFilter.decadeMap ?? [])].filter(([key, value]) => value.selected === true).map(e => e[0]),
+      }
     })} />;
   }
 
@@ -83,13 +87,13 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
       return <Text style={styles.message}>{"No videos to display."}</Text>;
     }
 
-    return <ScrollView style={styles.container}>
+    return <View  style={styles.container}>
       {catalogData.loaded && <VideoList videos={videos} />}
       <RefreshControl
         refreshing={refreshing}
         onRefresh={onRefresh}
       />
-    </ScrollView>;
+    </View>;
   }
 
   return (
@@ -106,12 +110,13 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
 const dataUrl = 'https://raw.githubusercontent.com/XiteTV/frontend-coding-exercise/main/data/dataset.json';
 
 const initialState: Catalog = {
-  genres: new Map<number, string>(),
   videos: [],
   filter: {
-    genreIds: new Set<number>(),
-    decadeIds: new Set<number>(),
-    keyword: null
+    genreMap: new Map<number, CatalogGenre>(),
+    decadeMap: new Map<number, CatalogDecade>(),
+    keyword: null,
+    genreIds: [],
+    decadeIds: [],
   },
   loaded: false,
   filterOpened: false,
@@ -119,7 +124,7 @@ const initialState: Catalog = {
 };
 
 const formatXiteCollectionResponse = (data: XiteCollectionResponse): Partial<Catalog> => {
-  let genres = new Map(data.genres.map(genre => [genre.id, genre.name]));
+  let genres = new Map(data.genres.map(genre => [genre.id, genre]));
 
   const videos = data.videos.map(item => {
     const title = (item.title ?? 'Unknown Title').toString();
@@ -131,33 +136,37 @@ const formatXiteCollectionResponse = (data: XiteCollectionResponse): Partial<Cat
       title: title,
       artist: artist,
       release_year: year,
-      genre_name: genres.get(item.genre_id) ?? 'Uncategorized',
+      genre_name: genres.get(item.genre_id)?.name ?? 'Uncategorized',
       search_index: `${title.toLowerCase()}#${artist.toLowerCase()}}`,
       decade_id: MusicDecades.find(e => e.start.toString() <= item.release_year && e.end.toString() > item.release_year)?.id
     } as CatalogVideo
   });
 
   return {
-    genres: genres,
     videos: videos,
+    filter: {
+      ...initialState.filter,
+      genreMap: genres,
+      decadeMap: new Map(MusicDecades.map(decade => [decade.id, decade]))
+    }
   };
 }
 
 const filterCatalogVideo = (data: CatalogVideo[], filter: CatalogFilter): CatalogVideo[] => {
   let filteredVideos = [...data];
 
-  if (filter.genreIds.size > 0) {
-    filteredVideos = data.filter(e => filter.genreIds.has(e.genre_id));
+  if (filter.genreIds.length > 0) {
+    filteredVideos = data.filter(e => filter.genreIds.includes(e.genre_id));
+  }
+
+  if (filter.decadeIds.length > 0) {
+    filteredVideos = data.filter(e => filter.decadeIds.includes(e.decade_id));
   }
 
   if (filter.keyword != null && filter.keyword.trim() != '') {
     const searchTerm = filter.keyword?.toLowerCase() as string;
 
     filteredVideos = filteredVideos.filter(e => e.search_index.includes(searchTerm))
-  }
-
-  if (filter.decadeIds.size > 0) {
-    filteredVideos = data.filter(e => filter.decadeIds.has(e.decade_id));
   }
 
   return filteredVideos;

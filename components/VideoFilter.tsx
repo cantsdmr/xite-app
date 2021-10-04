@@ -1,90 +1,80 @@
 import * as React from 'react';
 import { FC } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Divider, Searchbar } from 'react-native-paper';
-import { CatalogDecade } from '../types';
+import { Divider, Searchbar, TextInput } from 'react-native-paper';
+import { CatalogDecade, CatalogFilter, CatalogGenre } from '../types';
+import { debounce } from '../utils';
 import { Decade } from './Decade';
 import { Genre } from './Genre';
 import { View } from './Themed';
 
 export interface VideoFilterProps {
-  genres: Map<number, string>;
-  onFilterChanged?: Function;
+  filter: CatalogFilter;
+  onFilterChanged?: (filter: Partial<CatalogFilter>) => void;
 }
 
 export const VideoFilter: FC<VideoFilterProps> = (props) => {
-  const [filter, setFilter] = React.useState(initialState);
-
-  React.useEffect(() => {
-    props.onFilterChanged?.(filter);
-  }, [filter]);
-
   const onChangeSearch = (query: string) => {
-    const newFilter = {
-      ...filter,
+    props.onFilterChanged?.({
       keyword: query
-    };
-
-    setFilter(newFilter);
+    });
   }
 
-  const onChangeGenre = (genreId: number, isSelected: boolean) => {
-    let genreIds = new Set([...filter.genreIds]);
+  const onChangeGenre = (genre: CatalogGenre) => {
+    let genreMap = new Map([...props.filter.genreMap]);
 
-    isSelected ? genreIds.add(genreId) : genreIds.delete(genreId)
+    genreMap.delete(genre.id);
+    genreMap.set(genre.id, genre);
 
-    const newFilter = {
-      ...filter,
-      genreIds: genreIds
-    };
-
-    setFilter(newFilter);
+    props.onFilterChanged?.({
+      genreMap: genreMap
+    });
   }
 
-  const onChangeDecade = (decadeId: number, isSelected: boolean) => {
-    let decadeIds = new Set([...filter.decadeIds]);
+  const onChangeDecade = (decade: CatalogDecade) => {
+    let decadeMap = new Map([...props.filter.decadeMap]);
 
-    isSelected ? decadeIds.add(decadeId) : decadeIds.delete(decadeId)
+    decadeMap.delete(decade.id);
+    decadeMap.set(decade.id, decade);
 
-    const newFilter = {
-      ...filter,
-      decadeIds: decadeIds
-    };
-
-    setFilter(newFilter);
+    props.onFilterChanged?.({
+      decadeMap: decadeMap
+    });
   }
 
   let allGenres = [];
 
-  for (const genrePair of props.genres.entries()) {
+  for (let item of props.filter.genreMap.entries()) {
     const genre = <Genre
-      key={genrePair[0]}
-      genre={{
-        id: genrePair[0],
-        name: genrePair[1]
-      }}
-      onSelected={(isSelected: boolean) => onChangeGenre(genrePair[0], isSelected)} />;
+      key={item[0]}
+      genre={item[1]}
+      onSelected={(isSelected: boolean) => onChangeGenre({
+        ...item[1],
+        selected: isSelected
+      })} />;
 
     allGenres.push(genre);
   }
 
-  let allDecades = [];
+  let allDecades: any[] = [];
 
-  for (const decade of MusicDecades) {
+  for (let decade of props.filter.decadeMap.entries()) {
     const decadeElement = <Decade
-      key={decade.start}
-      decade={decade}
-      onSelected={(isSelected: boolean) => onChangeDecade(decade.id, isSelected)} />;
+      key={decade[0]}
+      decade={decade[1]}
+      onSelected={(isSelected: boolean) => onChangeDecade({
+        ...decade[1],
+        selected: isSelected
+      })} />;
 
     allDecades.push(decadeElement);
   }
 
   return (
     <>
-      <Searchbar
+      <TextInput
         placeholder="Search by title and artist"
-        onChangeText={onChangeSearch}
-        value={filter.keyword}
+        onChangeText={debounce(onChangeSearch, 2000)}
         style={styles.searchBar}
       />
       <ScrollView style={styles.filter}>
@@ -99,12 +89,6 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
     </>
   );
 };
-
-const initialState = {
-  genreIds: new Set<number>(),
-  keyword: "",
-  decadeIds: new Set<number>()
-}
 
 const styles = StyleSheet.create({
   genreContainer: {
@@ -126,7 +110,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   divider: {
-    backgroundColor : "#000"
+    backgroundColor: "#000"
   },
   filter: {
     width: '100%',
@@ -138,39 +122,47 @@ const styles = StyleSheet.create({
   }
 });
 
-export const MusicDecades: CatalogDecade[] = [{
-  id: 1,
-  name: "60's",
-  start: 1960,
-  end: 1970
-},
-{
-  id: 2,
-  name: "70's",
-  start: 1970,
-  end: 1980
-},
-{
-  id: 3,
-  name: "80's",
-  start: 1980,
-  end: 1990
-},
-{
-  id: 4,
-  name: "90's",
-  start: 1990,
-  end: 2000
-},
-{
-  id: 5,
-  name: "2000's",
-  start: 2000,
-  end: 2010
-},
-{
-  id: 6,
-  name: "2010's",
-  start: 2010,
-  end: 2020
-}];
+export const MusicDecades: CatalogDecade[] = [
+  {
+    id: 1,
+    name: "60's",
+    start: 1960,
+    end: 1970
+  },
+  {
+    id: 2,
+    name: "70's",
+    start: 1970,
+    end: 1980
+  },
+  {
+    id: 3,
+    name: "80's",
+    start: 1980,
+    end: 1990
+  },
+  {
+    id: 4,
+    name: "90's",
+    start: 1990,
+    end: 2000
+  },
+  {
+    id: 5,
+    name: "2000's",
+    start: 2000,
+    end: 2010
+  },
+  {
+    id: 6,
+    name: "2010's",
+    start: 2010,
+    end: 2020
+  },
+  {
+    id: 7,
+    name: "2020's",
+    start: 2020,
+    end: 2030
+  }
+];

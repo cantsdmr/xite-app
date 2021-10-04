@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import { CatalogVideo } from '../types';
 import { View } from './Themed';
 import { Video } from './Video';
@@ -9,12 +10,8 @@ export interface VideoListProps {
 }
 
 export function VideoList(props: VideoListProps) {
-  const videos = props.videos.map((videoItem, index) => {
-    return <Video key={index} video={videoItem} />;
-  });
-
   return <View style={styles.container}>
-    {videos}
+    <FlatList data={props.videos} renderItem={({ item }) => <Video video={item} />} />
   </View>
 }
 

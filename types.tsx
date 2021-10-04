@@ -56,6 +56,7 @@ export interface CatalogVideo extends XiteVideo {
 export interface CatalogGenre {
   id: number;
   name: string;
+  selected?: boolean;
 }
 
 export interface CatalogDecade {
@@ -63,10 +64,13 @@ export interface CatalogDecade {
   name: string;
   start: number;
   end: number;
+  selected?: boolean;
 }
 
 export interface CatalogFilter {
-  genreIds: Set<number>;
-  decadeIds: Set<number>;  
+  genreMap: Map<number, CatalogGenre>;
+  decadeMap: Map<number, CatalogDecade>;  
   keyword: string | null;
+  genreIds: number[];
+  decadeIds: number[];
 }

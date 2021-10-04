@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { FC } from 'react';
 import { StyleSheet } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import { Card, Paragraph } from 'react-native-paper';
-import { defaultXiteImage } from '../constants/Images';
 import { CatalogVideo } from '../types';
 import { View } from './Themed';
+
+
 export interface VideoProps {
   video: CatalogVideo;
 }
@@ -12,8 +14,8 @@ export interface VideoProps {
 export const Video: FC<VideoProps> = (props) => {
   return <View style={styles.wrapper}>
     <Card mode="elevated" style={styles.card}>
-      <Card.Cover source={{ uri: props.video?.image_url }} defaultSource={{
-        uri: defaultXiteImage
+      <FastImage source={{
+        uri: props.video?.image_url
       }} />
       <Card.Title title={props.video?.title} subtitle={props.video?.artist} />
       <Card.Content>
