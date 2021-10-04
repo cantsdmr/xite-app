@@ -53,14 +53,15 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
       : catalogData.filter.decadeIds
 
     setCatalogData({
-        ...catalogData,
-        filter: {
-          ...partialFilter,
-          ...catalogData.filter,          
-          genreIds: genreIds,
-          decadeIds: decadeIds
-        }
-      })
+      ...catalogData,
+      filter: {
+        ...catalogData.filter,
+        ...partialFilter,
+        keyword: partialFilter.keyword ?? catalogData.filter.keyword,
+        genreIds: genreIds,
+        decadeIds: decadeIds
+      }
+    })
   }
 
   const getFilterView = () => {
