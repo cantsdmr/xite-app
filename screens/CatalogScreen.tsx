@@ -55,8 +55,8 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
     setCatalogData({
         ...catalogData,
         filter: {
-          ...catalogData.filter,
           ...partialFilter,
+          ...catalogData.filter,          
           genreIds: genreIds,
           decadeIds: decadeIds
         }
