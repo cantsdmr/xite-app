@@ -20,7 +20,7 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
     setSearchTerm(query);
   }
 
-  const onEndSearch = (event: NativeSyntheticEvent<TextInputChangeEventData>) => {
+  const onEndSearch = (event: any) => {
     props.onFilterChanged?.({
       keyword: searchTerm
     })
@@ -82,6 +82,7 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
         placeholder="Search by title and artist"
         onChange={debounce(onEndSearch, 1500)}
         onChangeText={onChangeSearch}
+        onSubmitEditing={onEndSearch}
         value={searchTerm ?? ''}
         style={styles.searchBar}
       />
