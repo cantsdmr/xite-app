@@ -73,8 +73,18 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
   }
 
   const getListView = () => {
+    if (!catalogData.loaded) {
+      return <></>;
+    }
+
+    const videos = filterCatalogVideo(catalogData.videos, catalogData.filter);
+
+    if (videos.length === 0 && !catalogData.error) {
+      return <Text style={styles.message}>{"No videos to display."}</Text>;
+    }
+
     return <ScrollView style={styles.container}>
-      {catalogData.loaded && <VideoList videos={filterCatalogVideo(catalogData.videos, catalogData.filter)} />}
+      {catalogData.loaded && <VideoList videos={videos} />}
       <RefreshControl
         refreshing={refreshing}
         onRefresh={onRefresh}
