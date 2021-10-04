@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
-import { ActivityIndicator, Appbar, Colors } from 'react-native-paper';
+import { StyleSheet } from 'react-native';
+import { ActivityIndicator, Appbar } from 'react-native-paper';
 import { Text, View } from '../components/Themed';
 import { MusicDecades, VideoFilter } from '../components/VideoFilter';
 import { VideoList } from '../components/VideoList';
@@ -18,7 +18,6 @@ interface Catalog {
 
 export default function CatalogScreen({ navigation }: RootStackScreenProps<'Catalog'>) {
   const [catalogData, setCatalogData] = React.useState<Catalog>(initialState);
-  const [refreshing, setRefreshing] = React.useState<boolean>(false);
 
   useEffect(() => {
     fetchData();
@@ -44,18 +43,6 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
       loaded: true
     });
   }
-
-  const onRefresh = React.useCallback(() => {
-
-    const refreshAsync = async () => {
-      setRefreshing(true);
-      await fetchData();
-
-      setRefreshing(false);
-    }
-
-    refreshAsync();
-  }, []);
 
   const getFilterView = () => {
     return <VideoFilter filter={catalogData.filter} onFilterChanged={(partialFilter: Partial<CatalogFilter>) => setCatalogData({
@@ -87,12 +74,8 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
       return <Text style={styles.message}>{"No videos to display."}</Text>;
     }
 
-    return <View  style={styles.container}>
+    return <View style={styles.container}>
       {catalogData.loaded && <VideoList videos={videos} />}
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
     </View>;
   }
 

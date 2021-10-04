@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Divider, Searchbar, TextInput } from 'react-native-paper';
+import { Divider, TextInput } from 'react-native-paper';
 import { CatalogDecade, CatalogFilter, CatalogGenre } from '../types';
 import { debounce } from '../utils';
 import { Decade } from './Decade';
