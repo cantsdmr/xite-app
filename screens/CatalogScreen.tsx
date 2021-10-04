@@ -94,7 +94,7 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
     <View style={styles.root}>
       {getAppBarView()}
       {catalogData.loaded && catalogData.filterOpened && getFilterView()}
-      {!catalogData.loaded && <ActivityIndicator animating={true} color={"#98042D"} size={"large"} style={styles.indicator} />}
+      {!catalogData.loaded && <ActivityIndicator animating={true} color={"#FFF"} size={"large"} style={styles.indicator} />}
       {catalogData.loaded && catalogData.error && <Text style={styles.message}>{catalogData.error}</Text>}
       {getListView()}
     </View>
