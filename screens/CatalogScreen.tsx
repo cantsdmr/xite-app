@@ -119,9 +119,9 @@ const formatXiteCollectionResponse = (data: XiteCollectionResponse): Partial<Cat
       title: title,
       artist: artist,
       release_year: year,
-      genre_name: genres.get(item.genre_id)?.name ?? 'Uncategorized',
-      search_index: `${title.toLowerCase()}#${artist.toLowerCase()}}`,
-      decade_id: MusicDecades.find(e => e.start.toString() <= item.release_year && e.end.toString() > item.release_year)?.id
+      genreName: genres.get(item.genre_id)?.name ?? 'Uncategorized',
+      searchIndex: `${title.toLowerCase()}#${artist.toLowerCase()}}`,
+      decadeId: MusicDecades.find(e => e.start <= parseInt(item.release_year) && e.end > parseInt(item.release_year))?.id
     } as CatalogVideo
   });
 
@@ -139,17 +139,17 @@ const filterCatalogVideo = (data: CatalogVideo[], filter: CatalogFilter): Catalo
   let filteredVideos = [...data];
 
   if (filter.genreIds.length > 0) {
-    filteredVideos = data.filter(e => filter.genreIds.includes(e.genre_id));
+    filteredVideos = filteredVideos.filter(e => filter.genreIds.includes(e.genre_id) === true);
   }
 
   if (filter.decadeIds.length > 0) {
-    filteredVideos = data.filter(e => filter.decadeIds.includes(e.decade_id));
+    filteredVideos = filteredVideos.filter(e => filter.decadeIds.includes(e.decadeId) === true);
   }
 
   if (filter.keyword != null && filter.keyword.trim() != '') {
     const searchTerm = filter.keyword?.toLowerCase() as string;
 
-    filteredVideos = filteredVideos.filter(e => e.search_index.includes(searchTerm))
+    filteredVideos = filteredVideos.filter(e => e.searchIndex.includes(searchTerm) === true)
   }
 
   return filteredVideos;

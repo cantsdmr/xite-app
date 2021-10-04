@@ -71,7 +71,7 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
   }
 
   return (
-    <>
+    <View style={styles.container}>
       <TextInput
         placeholder="Search by title and artist"
         onChangeText={debounce(onChangeSearch, 2000)}
@@ -86,11 +86,14 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
           {allDecades}
         </View>
       </ScrollView>
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    zIndex: 100,
+  },
   genreContainer: {
     display: 'flex',
     flexDirection: 'row',

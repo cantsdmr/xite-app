@@ -48,9 +48,9 @@ export interface XiteCollectionResponse {
 }
 
 export interface CatalogVideo extends XiteVideo {
-  genre_name: string;
-  search_index: string;
-  decade_id: number
+  genreName: string;
+  searchIndex: string;
+  decadeId: number;
 }
 
 export interface CatalogGenre {

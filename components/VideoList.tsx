@@ -20,12 +20,7 @@ export function VideoList(props: VideoListProps) {
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
   },
 });

@@ -15,7 +15,7 @@ export const Video: FC<VideoProps> = (props) => {
     <Card.Cover source={{ uri: props.video?.image_url }} />
       <Card.Title title={props.video?.title} subtitle={props.video?.artist} />
       <Card.Content>
-        <Paragraph>{props.video?.genre_name} &bull; {props.video?.release_year}</Paragraph>
+        <Paragraph>{props.video?.genreName} &bull; {props.video?.release_year}</Paragraph>
       </Card.Content>
     </Card>
   </View>
