@@ -44,16 +44,27 @@ export default function CatalogScreen({ navigation }: RootStackScreenProps<'Cata
     });
   }
 
+  const updateFilter = (partialFilter: Partial<CatalogFilter>) => {
+    const genreIds = partialFilter.genreMap
+      ? [...partialFilter.genreMap].filter(([key, value]) => value.selected === true).map(e => e[0])
+      : catalogData.filter.genreIds;
+    const decadeIds = partialFilter.decadeMap
+      ? [...partialFilter.decadeMap].filter(([key, value]) => value.selected === true).map(e => e[0])
+      : catalogData.filter.decadeIds
+
+    setCatalogData({
+        ...catalogData,
+        filter: {
+          ...catalogData.filter,
+          ...partialFilter,
+          genreIds: genreIds,
+          decadeIds: decadeIds
+        }
+      })
+  }
+
   const getFilterView = () => {
-    return <VideoFilter filter={catalogData.filter} onFilterChanged={(partialFilter: Partial<CatalogFilter>) => setCatalogData({
-      ...catalogData,
-      filter: {
-        ...catalogData.filter,
-        ...partialFilter,
-        genreIds: [...(partialFilter.genreMap ?? [])].filter(([key, value]) => value.selected === true).map(e => e[0]),
-        decadeIds: [...(partialFilter.decadeMap ?? [])].filter(([key, value]) => value.selected === true).map(e => e[0]),
-      }
-    })} />;
+    return <VideoFilter filter={catalogData.filter} onFilterChanged={updateFilter} />;
   }
 
   const getAppBarView = () => {
