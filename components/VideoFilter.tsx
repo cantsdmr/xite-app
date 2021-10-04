@@ -3,7 +3,6 @@ import { FC } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Divider, Searchbar } from 'react-native-paper';
 import { CatalogDecade } from '../types';
-import { throttle } from '../utils';
 import { Decade } from './Decade';
 import { Genre } from './Genre';
 import { View } from './Themed';
@@ -71,7 +70,7 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
 
   let allDecades = [];
 
-  for (const decade of decades) {
+  for (const decade of MusicDecades) {
     const decadeElement = <Decade
       key={decade.start}
       decade={decade}
@@ -84,15 +83,16 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
     <>
       <Searchbar
         placeholder="Search by title and artist"
-        onChangeText={throttle(onChangeSearch, 2500)}
+        onChangeText={onChangeSearch}
         value={filter.keyword}
+        style={styles.searchBar}
       />
       <ScrollView style={styles.filter}>
-        <View style={styles.chipContainer}>
+        <View style={styles.genreContainer}>
           {allGenres}
         </View>
         <Divider style={styles.divider} />
-        <View style={styles.chipContainer}>
+        <View style={styles.decadeContainer}>
           {allDecades}
         </View>
       </ScrollView>
@@ -107,26 +107,38 @@ const initialState = {
 }
 
 const styles = StyleSheet.create({
-  chipContainer: {
+  genreContainer: {
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: '#ebdfdf',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 20,
+  },
+  decadeContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'flex-start',
     padding: 20,
   },
   divider: {
-    width: '50%'
+    backgroundColor : "#000"
   },
   filter: {
     width: '100%',
     height: 300,
     zIndex: 100
+  },
+  searchBar: {
+    borderRadius: 0
   }
 });
 
-export const decades: CatalogDecade[] = [{
+export const MusicDecades: CatalogDecade[] = [{
   id: 1,
   name: "60's",
   start: 1960,

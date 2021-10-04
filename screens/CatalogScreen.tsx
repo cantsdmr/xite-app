@@ -1,13 +1,12 @@
 import axios from 'axios';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { ActivityIndicator, Appbar, Colors } from 'react-native-paper';
-import { View } from '../components/Themed';
-import { decades, VideoFilter } from '../components/VideoFilter';
+import { Text, View } from '../components/Themed';
+import { MusicDecades, VideoFilter } from '../components/VideoFilter';
 import { VideoList } from '../components/VideoList';
 import { CatalogFilter, CatalogVideo, RootStackScreenProps, XiteCollectionResponse } from '../types';
-
 
 interface Catalog {
   genres: Map<number, string>;
@@ -15,41 +14,81 @@ interface Catalog {
   filter: CatalogFilter;
   loaded: boolean;
   filterOpened: boolean;
+  error: null | string;
 }
 
 export default function CatalogScreen({ navigation }: RootStackScreenProps<'Catalog'>) {
   const [catalogData, setCatalogData] = React.useState<Catalog>(initialState);
+  const [refreshing, setRefreshing] = React.useState<boolean>(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.get<XiteCollectionResponse>(dataUrl);
-      const formattedCatalogData = formatXiteCollectionResponse(response.data);
-
-      setCatalogData({
-        ...catalogData,
-        ...formattedCatalogData,
-        loaded: true
-      });
-    }
-
     fetchData();
   }, [])
 
+  const fetchData = async () => {
+    const response = await axios.get<XiteCollectionResponse>(dataUrl);
+
+    if (!(response.status >= 200 && response.status < 400)) {
+      setCatalogData({
+        ...catalogData,
+        error: "Error occured, please try again later.",
+        loaded: true
+      });
+      return;
+    }
+
+    const formattedCatalogData = formatXiteCollectionResponse(response.data);
+
+    setCatalogData({
+      ...catalogData,
+      ...formattedCatalogData,
+      loaded: true
+    });
+  }
+
+  const onRefresh = React.useCallback(() => {
+
+    const refreshAsync = async () => {
+      setRefreshing(true);
+      await fetchData();
+
+      setRefreshing(false);
+    }
+
+    refreshAsync();
+  }, []);
+
+  const getFilterView = () => {
+    return <VideoFilter genres={catalogData.genres} onFilterChanged={(newFilter: CatalogFilter) => setCatalogData({
+      ...catalogData,
+      filter: newFilter
+    })} />;
+  }
+
+  const getAppBarView = () => {
+    return <Appbar.Header>
+      <Appbar.Content titleStyle={styles.title} title="XITE Catalog" />
+      {catalogData.loaded && <Appbar.Action icon="filter-variant" onPress={() => setCatalogData({ ...catalogData, filterOpened: !catalogData.filterOpened })} />}
+    </Appbar.Header>;
+  }
+
+  const getListView = () => {
+    return <ScrollView style={styles.container}>
+      {catalogData.loaded && <VideoList videos={filterCatalogVideo(catalogData.videos, catalogData.filter)} />}
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+    </ScrollView>;
+  }
+
   return (
     <View style={styles.root}>
-      <Appbar.Header>
-        <Appbar.Content title="XITE Catalog" />
-        <Appbar.Action icon="filter-variant" onPress={() => setCatalogData({ ...catalogData, filterOpened: !catalogData.filterOpened })} />
-      </Appbar.Header>
-      {catalogData.loaded && catalogData.filterOpened && <VideoFilter genres={catalogData.genres} onFilterChanged={(newFilter: CatalogFilter) => setCatalogData({
-        ...catalogData,
-        filter: newFilter
-      })} />
-      }
-      <ScrollView style={styles.container}>
-        {!catalogData.loaded && <ActivityIndicator animating={true} color={Colors.red800} size={"large"} style={styles.indicator} />}
-        {catalogData.loaded && <VideoList videos={filterCatalogVideo(catalogData.videos, catalogData.filter)} />}
-      </ScrollView>
+      {getAppBarView()}
+      {catalogData.loaded && catalogData.filterOpened && getFilterView()}
+      {!catalogData.loaded && <ActivityIndicator animating={true} color={"#98042D"} size={"large"} style={styles.indicator} />}
+      {catalogData.loaded && catalogData.error && <Text style={styles.message}>{catalogData.error}</Text>}
+      {getListView()}
     </View>
   );
 }
@@ -65,7 +104,8 @@ const initialState: Catalog = {
     keyword: null
   },
   loaded: false,
-  filterOpened: false
+  filterOpened: false,
+  error: null,
 };
 
 const formatXiteCollectionResponse = (data: XiteCollectionResponse): Partial<Catalog> => {
@@ -83,7 +123,7 @@ const formatXiteCollectionResponse = (data: XiteCollectionResponse): Partial<Cat
       release_year: year,
       genre_name: genres.get(item.genre_id) ?? 'Uncategorized',
       search_index: `${title.toLowerCase()}#${artist.toLowerCase()}}`,
-      decade_id: decades.find(e => e.start.toString() <= item.release_year && e.end.toString() > item.release_year)?.id
+      decade_id: MusicDecades.find(e => e.start.toString() <= item.release_year && e.end.toString() > item.release_year)?.id
     } as CatalogVideo
   });
 
@@ -121,7 +161,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%'
   },
+  title: {
+    fontWeight: 'bold'
+  },
   indicator: {
-    height: '100%'
-  }, 
+    width: '100%',
+    margin: 0,
+    position: 'absolute',
+    top: '50%',
+  },
+  message: {
+    width: '100%',
+    margin: 0,
+    position: 'absolute',
+    top: '50%',
+    textAlign: 'center'
+  },
 });
