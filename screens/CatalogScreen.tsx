@@ -159,7 +159,7 @@ const filterCatalogVideo = (data: CatalogVideo[], filter: CatalogFilter): Catalo
   }
 
   if (filter.keyword != null && filter.keyword.trim() != '') {
-    const searchTerm = filter.keyword?.toLowerCase() as string;
+    const searchTerm = filter.keyword.toLowerCase() as string;
 
     filteredVideos = filteredVideos.filter(e => e.searchIndex.includes(searchTerm) === true)
   }

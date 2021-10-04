@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FC } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { Divider, TextInput } from 'react-native-paper';
+import { NativeSyntheticEvent, ScrollView, StyleSheet, TextInputChangeEventData } from 'react-native';
+import { Divider, Searchbar } from 'react-native-paper';
 import { CatalogDecade, CatalogFilter, CatalogGenre } from '../types';
 import { debounce } from '../utils';
 import { Decade } from './Decade';
@@ -14,10 +14,16 @@ export interface VideoFilterProps {
 }
 
 export const VideoFilter: FC<VideoFilterProps> = (props) => {
+  const [searchTerm, setSearchTerm] = React.useState(props.filter.keyword);
+
   const onChangeSearch = (query: string) => {
+    setSearchTerm(query);
+  }
+
+  const onEndSearch = (event: NativeSyntheticEvent<TextInputChangeEventData>) => {
     props.onFilterChanged?.({
-      keyword: query
-    });
+      keyword: searchTerm
+    })
   }
 
   const onChangeGenre = (genre: CatalogGenre) => {
@@ -72,9 +78,11 @@ export const VideoFilter: FC<VideoFilterProps> = (props) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
+      <Searchbar
         placeholder="Search by title and artist"
-        onChangeText={debounce(onChangeSearch, 2000)}
+        onChange={debounce(onEndSearch, 1500)}
+        onChangeText={onChangeSearch}
+        value={searchTerm ?? ''}
         style={styles.searchBar}
       />
       <ScrollView style={styles.filter}>
